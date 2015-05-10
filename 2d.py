@@ -2,11 +2,15 @@ from __future__ import division
 import numpy as np
 from math import *
 
-##1d test
-#sin wave at the middle
-
+################################################################################
+##final project for general physics in NTU by 顏立峯 and 吳達懿
+##dim : 2d
+##type : sin / gaussian
+##snap : dynamic,from side
+##others : none
+################################################################################
 ##parameter1
-c = 299792458  
+c = 299792458
 u0 = pi*4E-7
 e0 = 1/(u0*c**2)
 
@@ -34,26 +38,26 @@ for  n in range(1000):
     hx[:,:] -= dt/(u0*dx)*(ez[:,1:]-ez[:,:size-1])
 
     hy[:,:] += dt/(u0*dx)*(ez[1:,:]-ez[:size-1,:])
-    
+
     ez[1:size-1,1:size-1] += dt/(e0*dx)*(
         (hy[1:,1:size-1]-hy[:size-2,1:size-1])-(
             hx[1:size-1,1:]-hx[1:size-1,:size-2]))
 
     #ez[100,100] = exp(-(n-8)**2/16)
-    
+
     ez [100,100] = sin(2*pi*f*n*dt)
 
     if n %10 ==0:
         file = open ('2d.%d.txt'%int(n/10),'w')
-        
+
         for i in range(size):
 
             for j in range(size):
-        
+
                 file.write("%f "%ez[i,j])
 
             file.write("\n")
-        
+
         file.close()
 
     if n == 150:
@@ -63,5 +67,3 @@ for  n in range(1000):
         file.close()
 
 print "end"
-
-    
