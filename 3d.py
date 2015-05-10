@@ -2,11 +2,15 @@ from __future__ import division
 import numpy as np
 from math import *
 
-##1d test
-#sin wave at the middle
+################################################################################
+##final project for general physics in NTU by 顏立峯 and 吳達懿
+##dim : 3d
+##type : sin
+##snap : dynamic / all information
+################################################################################
 
 ##parameter1
-c = 299792458  
+c = 299792458
 u0 = pi*4E-7
 e0 = 1/(u0*c**2)
 
@@ -50,22 +54,20 @@ for  n in range(250):
     ez[1:size-1,1:size-1,:] += imp2*((hy[1:,1:size-1,:]-hy[:size-2,1:size-1,:])-(hx[1:size-1,1:,:]-hx[1:size-1,:size-2,:]))
 
     ez [50,50,50] = sin(2*pi*f*n*dt)
-        
+
     if n%10 == 0:
 
-        file = open('3dz50.%d.txt'%int(n/10),'w')
+        file = open('3d.%d.txt'%int(n/10),'w')
 
         for i in range(5):
-    
+
             for j in range(5):
 
                 for k in range(5):
-        
+
                     file.write("%d %d %d %f %f %f %f %f %f\n "%(20*i,20*j,20*k,ex[20*i,20*j,20*k],ey[20*i,20*j,20*k],ez[10*i,10*j,10*k],
                                                                 hx[20*i,20*j,20*k],hy[20*i,20*j,20*k],hz[20*i,20*j,20*k]))
 
         file.close()
 
 print "end"
-
-    

@@ -2,8 +2,13 @@ from __future__ import division
 import numpy as np
 import math
 
-##one dimensional FDTD test
-##TFSF boundary
+################################################################################
+##final project for general physics in NTU by 顏立峯 and 吳達懿
+##dim : 1d
+##type : gaussian
+##snap : dynamic
+##others : tfsf boundary
+################################################################################
 
 size = 200
 
@@ -20,15 +25,15 @@ for i in range(maxtime):
         hy[49] -= math.exp(-(i-30)*(i-30)/100)/imp0
 
         ez[0]=ez[1]
-        
+
         ez[size-1]=ez[size-2]=0
-        
+
         ez[1:size-1]=ez[1:size-1]+(hy[1:size-1]-hy[0:size-2])*imp0
 
 
         ez[50]+=math.exp(-(i+0.5+0.5-30)*(i+0.5+0.5-30)/100)
 
-        
+
 
         if i%10==0:
                 file=open('tfsf50.%d.txt'%int(i/10),'w')
