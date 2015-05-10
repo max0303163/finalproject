@@ -2,8 +2,13 @@ from __future__ import division
 import numpy as np
 from math import*
 
-##one dimensional FDTD test
-##harmonic wave
+################################################################################
+##final project for general physics in NTU by 顏立峯 and 吳達懿
+##dim : 1d
+##type : sin
+##snap : one time
+##other : two maxtime
+################################################################################
 
 size = 200
 N=100

@@ -5,11 +5,12 @@ from math import *
 
 ################################################################################
 ##final project for general physics in NTU by 顏立峯 and 吳達懿
-##1d test
-#sin wave at the middle
-
-##parameter1
-print x
+##dim : 1d
+##type : sin
+##snap : one time
+##other : ABC boundary
+################################################################################
+##parameter
 c = 299792458
 u0 = pi*4E-7
 e0 = 1/(u0*c**2)
