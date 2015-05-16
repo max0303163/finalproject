@@ -7,8 +7,8 @@ from math import *
 ################################################################################
 ##final project for general physics in NTU by 顏立峯 and 吳達懿
 ##dim : 1d
-##type : sin
-##snap : one time
+##type : sin/gaussian
+##snap : one time/fft
 ##other : ABC boundary
 ################################################################################
 ##parameter
@@ -23,6 +23,9 @@ dt = 0.18e-9
 dx = c*dt
 
 size = 401
+
+##
+record = np.zeros((int(50e-9/dt)))
 
 ##
 hy = np.zeros(size)
@@ -41,9 +44,16 @@ while t <= 50e-9:
 
     ez[1:] = (2*e0-loe*dt)/(2*e0+loe*dt)*ez[1:]+(2*dt)/((2*e0+loe*dt)*dx)*(hy[1:]-hy[:size-1])
 
-    ez[200] = sin(2*pi*f*t)
+    #ez[200] = sin(2*pi*f*t)
+
+    ez[200] = exp(-(t/dt-8)**2/100)
+
+    record[t/dt] = ez[50]
 
     t += dt
+
+yfft = np.fft.fft(record)
+xfft = np.linspace(0.0,1/(2*dt),(int(50e-9/dt))/2)
 
 file = open ('1dtest.txt','w')
 
@@ -53,4 +63,11 @@ for i in range(size):
 
 file.close()
 
+file = open ('1dfft.txt','w')
+
+for i in range((int(50e-9/dt/2))):
+
+    file.write("%f %f\n"%(xfft[i],2/(int(50e-9/dt))*abs(yfft[i])))
+
+file.close()
 print "end"
