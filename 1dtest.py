@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 import numpy as np
 from math import *
@@ -14,7 +15,8 @@ from math import *
 c = 299792458
 u0 = pi*4E-7
 e0 = 1/(u0*c**2)
-
+loe=0.001
+lom=0
 ##
 t = 0
 dt = 0.18e-9
@@ -37,7 +39,7 @@ while t <= 50e-9:
 
     ez[0] = ez[1]
 
-    ez[1:] += dt/(e0*dx)*(hy[1:]-hy[:size-1])
+    ez[1:] = (2*e0-loe*dt)/(2*e0+loe*dt)*ez[1:]+(2*dt)/((2*e0+loe*dt)*dx)*(hy[1:]-hy[:size-1])
 
     ez[200] = sin(2*pi*f*t)
 
