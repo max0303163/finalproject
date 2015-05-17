@@ -8,7 +8,7 @@ import math
 ##type : gaussian
 ##snap : dynamic
 ##others : tfsf boundary
-##command : set yrange[-0.3:1] ; set xrange[0:200] ; do for [i=0:99]{plot 'tfsf50.'.i.'.txt' w l notitle ; pause 0.2}
+##command : do for [i=0:45]{load 'tfsf.'.i.'.plt';pause 0.2}
 ################################################################################
 
 size = 200

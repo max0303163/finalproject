@@ -15,7 +15,7 @@ from math import *
 c = 299792458
 u0 = pi*4E-7
 e0 = 1/(u0*c**2)
-loe=0.001
+loe=0.00
 lom=0
 ##
 t = 0
@@ -25,7 +25,7 @@ dx = c*dt
 size = 401
 
 ##
-record = np.zeros((int(50e-9/dt)))
+
 
 ##
 hy = np.zeros(size)
@@ -33,8 +33,10 @@ ez = np.zeros(size)
 
 ##
 f = 278e+6
+maxtime = 50e-9
+record = np.zeros((int(maxtime/dt)))
 
-while t <= 50e-9:
+while t <= maxtime:
 
     hy[size-1] = hy[size-2]
 
@@ -44,9 +46,9 @@ while t <= 50e-9:
 
     ez[1:] = (2*e0-loe*dt)/(2*e0+loe*dt)*ez[1:]+(2*dt)/((2*e0+loe*dt)*dx)*(hy[1:]-hy[:size-1])
 
-    #ez[200] = sin(2*pi*f*t)
+    ez[200] = sin(2*pi*f*t)
 
-    ez[200] = exp(-(t/dt-8)**2/16)
+    #ez[200] = exp(-(t/dt-8)**2/16)
 
     record[t/dt] = ez[50]
 
@@ -65,9 +67,9 @@ file.close()
 
 file = open ('1dfft.txt','w')
 
-for i in range((int(50e-9/dt/2))):
+for i in range((int(maxtime/dt/2))):
 
-    file.write("%f %f\n"%(xfft[i],2/(int(50e-9/dt))*abs(yfft[i])))
+    file.write("%f %f\n"%(xfft[i],2/(int(maxtime/dt))*abs(yfft[i])))
 
 file.close()
 print "end"

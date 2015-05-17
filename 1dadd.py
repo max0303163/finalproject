@@ -8,7 +8,7 @@ import math
 ##type : gaussian
 ##snap : dynamic
 ##others : add source
-##command : set yrange[-0.3:1] ; set xrange[0:200] ; do for [i=0:99]{plot 'add50.'.i.'.txt' w l notitle ; pause 0.2} 
+##command : do for [i=0:45]{load 'add.'.i.'.plt' ; pause 0.2}  
 ################################################################################
 size = 200
 
