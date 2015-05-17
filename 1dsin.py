@@ -18,10 +18,10 @@ hy=np.zeros(size)
 imp0=377.0
 
 #change this one
-maxtime=250
-#maxtime=1000
+#maxtime=250
+maxtime=1000
 
-file=open('cos.txt','w')
+file=open('cos1000.txt','w')
 for i in range(maxtime):
         hy[0:size-2]=hy[0:size-2]+(ez[1:size-1]-ez[0:size-2])/imp0
 
