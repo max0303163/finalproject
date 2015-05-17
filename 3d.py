@@ -7,6 +7,7 @@ from math import *
 ##dim : 3d
 ##type : sin
 ##snap : dynamic / all information
+##command : do for [i=0:24]{load '3d.'.i.'.plt' ; pause 0.5}
 ################################################################################
 
 ##parameter1
