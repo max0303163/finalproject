@@ -46,7 +46,7 @@ while t <= 50e-9:
 
     #ez[200] = sin(2*pi*f*t)
 
-    ez[200] = exp(-(t/dt-8)**2/100)
+    ez[200] = exp(-(t/dt-8)**2/16)
 
     record[t/dt] = ez[50]
 
