@@ -7,7 +7,7 @@ from math import *
 ##dim : 2d
 ##type : sin / gaussian
 ##snap : dynamic,from side
-##others : pml
+##others : none
 ##command : do for [i=0:45]{load '2d.'.i.'.plt'; pause 0.2 }
 ################################################################################
 ##parameter1
@@ -17,7 +17,7 @@ e0 = 1/(u0*c**2)
 
 ##
 
-dx = dy = 1
+dx = 5.4e-2
 dt = dx/c/sqrt(2)
 
 size = 201
@@ -28,76 +28,85 @@ hy = np.zeros((size-1,size))
 ez = np.zeros((size,size))
 
 ##
-f = 15e+6
-sig = 0
-sigm = 0
+Ezx = np.zeros((size,size))
+Ezy = np.zeros((size,size))
+caEzx = np.ones((size,size))
+caEzy = np.ones((size,size))
+cbEzx = np.ones((size,size)) * dt/(e0*dx)
+cbEzy = np.ones((size,size)) * dt/(e0*dx)
+daHx = np.ones((size,size-1))
+daHy = np.ones((size-1,size))
+dbHx = np.ones((size,size-1)) * dt/(u0*dx)
+dbHy = np.ones((size-1,size)) * dt/(u0*dx)
 
 ##
-sym = sxm = sy = sx = np.zeros((size))
-aex = bex = ahx = bhx = np.zeros((size,1))
-aey = bey = ahy = bhy = np.zeros((1,size))
-Phy = Phx = np.zeros((size-1,size-1))
-Pex = Pey = np.zeros((size-2,size-2))
+f = 278e+6
 
 ##
-m = 4
-sxmax = -(m+1)*log(1e-6)/2/377/(10*dx)
+npmls = 10
+rsize = size - npmls
+sigmax = -3*e0*c*log(1e-5)/(2*dx*npmls)
+rhomax = sigmax*(u0/e0)
+sig = np.zeros((npmls))
+rho = np.zeros((npmls))
+ca = np.zeros((npmls))
+cb = np.zeros((npmls))
+da = np.zeros((npmls))
+db = np.zeros((npmls))
 
-##
-for mm in range(10):
-    sy[mm+1] = sxmax*((11-mm-0.5)/10)**4
-    sym[mm] = sxmax*((11-mm)/10)**4
-    sy[size-1-mm] = sxmax*((11-mm-0.5)/10)**4
-    sym[size-1-mm] = sxmax*((11-mm)/10)**4
-    sx[mm+1] = sxmax*((11-mm-0.5)/10)**4
-    sxm[mm] = sxmax*((11-mm)/10)**4
-    sx[size-1-mm] = sxmax*((11-mm-0.5)/10)**4
-    sxm[size-1-mm] = sxmax*((11-mm)/10)**4
-    
-##
-aex[:,0] = np.exp(-sx[:]*dt/e0) - 1
-bex[:,0] = aex[:,0] + 1
-aey[0,:] = np.exp(-sy[:]*dt/e0) - 1
-bey[0,:] = aey[0,:] + 1
-ahx[:,0] = np.exp(-sxm[:]*dt/e0) - 1
-bhx[:,0] = ahx[:,0] + 1
-ahy[0,:] = np.exp(-sym[:]*dt/e0) - 1
-bhy[0,:] = ahy[0,:] + 1
-
-##
-bhy = np.tile(bhy,(size-1,1))
-ahy = np.tile(ahy,(size-1,1))
-bey = np.tile(bey,(size-2,1))
-aey = np.tile(aey,(size-2,1))
-bhx = np.tile(bhx,(1,size-1))
-ahx = np.tile(ahx,(1,size-1))
-bex = np.tile(bex,(1,size-2))
-aex = np.tile(aex,(1,size-2))
+for m in range(npmls):
+    sig[m] = sigmax*((m+0.5)/(npmls+0.5))**2
+    rho[m] = rhomax*((m+1)/(npmls+0.5))**2
+    re = sig[m]*dt/e0
+    rm = rho[m]*dt/u0
+    ca[m] = exp(-re)
+    cb[m] = -(exp(-re)-1)/sig[m]/dx
+    da[m] = exp(-rm)
+    db[m] = -(exp(-rm)-1)/rho[m]/dx
 
 
 ##
+for i in range(1,size-1):
+    for j in range(1,npmls+1):
+        m = npmls+2-j-2
+        caEzy[i,j] = ca[m]
+        cbEzy[i,j] = cb[m]
+        daHx[i,j-1] = da[m-1]
+        dbHx[i,j-1] = db[m-1]
 
-for  n in range(10):
-    
-    Phy[:,:] = bhy[:,:size-1]*Phy[:,:] + ahy[:,:size-1]*(ez[:size-1,1:]-ez[:size-1,:size-1])/dy
+    for j in range(rsize,size-1):
+        m = j+1-rsize-1
+        caEzy[i,j] = ca[m]
+        cbEzy[i,j] = cb[m]
+        daHx[i,j] = da[m]
+        dbHx[i,j] = db[m]
 
-    Phx[:,:] = bhx[:size-1,:]*Phx[:,:] + ahx[:size-1,:]*(ez[1:,:size-1]-ez[:size-1,:size-1])/dx
+for j in range(1,size-1):
+    for i in range(1,npmls+1):
+        m = npmls+2-i-2
+        caEzx[i,j] = ca[m]
+        cbEzx[i,j] = cb[m]
+        daHy[i-1,j] = da[m-1]
+        dbHy[i-1,j] = db[m-1]
 
-    hx[:size-1,:] = hx[:size-1,:] - dt/(u0*dx)*(ez[:size-1,1:]-ez[:size-1,:size-1]) - dt/u0*Phy[:,:]
+    for i in range(rsize,size-1):
+        m = i+1-rsize-1
+        caEzx[i,j] = ca[m]
+        cbEzx[i,j] = cb[m]
+        daHy[i,j] = da[m]
+        dbHy[i,j] = db[m]
 
-    hy[:,:size-1] = hy[:,:size-1] + dt/(u0*dx)*(ez[1:,:size-1]-ez[:size-1,:size-1]) + dt/u0*Phx[:,:]
 
-    print Phy[100,:]
 
-    Pex[:,:] = bex[1:size-1,:]*Pex[:,:] + aex[1:size-1,:]*(hy[:size-2,1:size-1]-hy[1:,1:size-1])/dx
+for  n in range(1000):
 
-    Pey[:,:] = bey[:,1:size-1]*Pey[:,:] + aey[:,1:size-1]*(hx[1:size-1,:size-2]-hx[1:size-1,1:])/dy
+    hx[:,:] = daHx[:,:] * hx[:,:] - dbHx[:,:] * (ez[:,1:]-ez[:,:size-1])
 
-    
+    hy[:,:] = daHy[:,:] * hy[:,:] + dbHy[:,:] * (ez[1:,:]-ez[:size-1,:])
 
-    ez[1:size-1,1:size-1] = ez[1:size-1,1:size-1] + dt/(e0*dx)*(
-        (hy[1:,1:size-1]-hy[:size-2,1:size-1])-(
-            hx[1:size-1,1:]-hx[1:size-1,:size-2])) + dt/u0*(Pex[:,:] - Pey[:,:])
+    Ezx[1:size-1,1:size-1] = caEzx[1:size-1,1:size-1] * Ezx[1:size-1,1:size-1] + cbEzx[1:size-1,1:size-1] * (hy[1:,1:size-1]-hy[:size-2,1:size-1])
+    Ezy[1:size-1,1:size-1] = caEzy[1:size-1,1:size-1] * Ezy[1:size-1,1:size-1] - cbEzy[1:size-1,1:size-1] * (hx[1:size-1,1:]-hx[1:size-1,:size-2])
+    ez[1:size-1,1:size-1] = Ezx[1:size-1,1:size-1] + Ezy[1:size-1,1:size-1]
 
     #ez[100,100] = exp(-(n-8)**2/16)
 
