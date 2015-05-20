@@ -8,7 +8,7 @@ from math import *
 ##type : sin / gaussian
 ##snap : dynamic,from side
 ##others : none
-##command : do for [i=0:45]{load '2d.'.i.'.plt'; pause 0.2 }
+##command : do for [i=0:45]{load '2dpml.'.i.'.plt'; pause 0.2 }
 ################################################################################
 ##parameter1
 c = 299792458
