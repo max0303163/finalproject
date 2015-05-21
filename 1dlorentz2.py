@@ -28,7 +28,7 @@ size = 401
 ##
 edc = np.array([10])
 einf = np.array([1])
-f0 = np.array([300e+3])
+f0 = np.array([1000e+3])
 w0 = f0*2*np.pi
 phi = w0/100
 
@@ -67,9 +67,9 @@ while t <= maxtime:
 
     ez[1:] = ((2*e0*einf*sbeta-sigma*dt)/(2*e0*einf*sbeta+sigma*dt))*ez[1:] + 2*dt*(((hy[1:]-hy[:size-1])/dx)-sJ[1:])/(2*e0*einf+sbeta+sigma*dt)
 
-    #ez[200] = exp(-(t-3*20*dt)**2/(20*dt)**2)*sin(2*pi*f*(t-3*20*dt))
+    ez[200] = exp(-(t-3*20*dt)**2/(20*dt)**2)*sin(2*pi*f*(t-3*20*dt))
 
-    ez[200] = sin(2*pi*f*(t-3*20*dt))
+    #ez[200] = sin(2*pi*f*(t-3*20*dt))
 
     for p in range(f0.size):
 
@@ -86,7 +86,7 @@ while t <= maxtime:
 yfft = np.fft.fft(record)
 xfft = np.linspace(0.0,1/(2*dt),(int(maxtime/dt/2)))
 
-file = open ('1dlorentz.txt','w')
+file = open ('1dlorentz1000.txt','w')
 
 for i in range(size):
 
@@ -94,7 +94,7 @@ for i in range(size):
 
 file.close()
 
-file = open ('1dfftlorentx.txt','w')
+file = open ('1dfftlorentz1000.txt','w')
 
 for i in range((int(maxtime/dt/2))):
 

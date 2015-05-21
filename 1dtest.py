@@ -46,10 +46,12 @@ while t <= maxtime:
 
     ez[1:] = (2*e0-loe*dt)/(2*e0+loe*dt)*ez[1:]+(2*dt)/((2*e0+loe*dt)*dx)*(hy[1:]-hy[:size-1])
 
-    ez[200] = sin(2*pi*f*t)
+    #ez[200] = sin(2*pi*f*t)
 
     #ez[200] = exp(-(t/dt-8)**2/16)
 
+    ez[200] = (1-2*(np.pi*f*(t))**2)*exp(-(np.pi*f*(t))**2)
+    
     record[t/dt] = ez[50]
 
     t += dt
