@@ -14,14 +14,15 @@ import cmath
 c = 299792458
 u0 = pi*4E-7
 e0 = 1/(u0*c**2)
-er2 = 9.34
-sigma1 = 0
 sigma2 = 3.50E+7
+sigma1 = 8e-15
 
 ##parameter
 dx = 5.4e-3
 dt = dx/c/sqrt(2)
 size = 201
+
+f = 278e+7
 
 ##lorentz parameter
 edc = np.array([2.52])
@@ -39,12 +40,33 @@ bp = e0*cp*dt/(1-ap*dt/2)
 sbeta = 0
 for p in range(f0.size):
     sbeta += 2*bp[p].real
-    
+
 C1 = (2*e0*einf*sbeta-sigma2*dt)/(2*e0*einf*sbeta+sigma2*dt)
 C2 = (2*e0*einf+sbeta+sigma2*dt)
 
 
 ##plasma
+me = 9.109e-31
+qe = 1.602e-19
+w_pla = 1.78e+13
+v_pla = 4.4e+11
+sigma_pla = 1j*e0*w_pla**2/((2*pi*f)**2-1j*(2*pi*f)*v_pla)
+
+c_pla = -(w_pla**2)/2
+a_pla = -v_pla
+k_pla = (1+a_pla*dt/2)/(1-a_pla*dt/2)
+b_pla = e0*c_pla*dt/(1-a_pla*dt/2)
+
+kp_pla = np.zeros((size,size))
+bp_pla = np.zeros((size,size))
+Jp_pla = np.zeros((size,size))
+C1_pla = np.zeros((size,size))
+C2_pla = np.zeros((size,size))
+
+kp_pla[:,:] = -1
+
+C1_pla[:,:] = (2*e0-sigma1*dt)/(2*e0+sigma1*dt)
+C2_pla[:,:] = (2*e0+sigma1*dt)
 
 ##TM mode
 hx = np.zeros((size,size-1))
@@ -68,8 +90,7 @@ daHy = np.ones((size-1,size))
 dbHx = np.ones((size,size-1)) * dt/(u0*dx)
 dbHy = np.ones((size-1,size)) * dt/(u0*dx)
 
-##frequency
-f = 278e+7
+
 
 ##range for air
 cutl = 10
@@ -163,11 +184,17 @@ for  n in range(500):
     ez[cutl:cutr,cutd:size-1] = Ezx[cutl:cutr,cutd:size-1] + Ezy[cutl:cutr,cutd:size-1]
 
     ##air update
-    ez[cutl:pokl,cutu:cutd] += dt/(e0*dx)*((hy[cutl:pokl,cutu:cutd]-hy[cutl-1:pokl-1,cutu:cutd])-(hx[cutl:pokl,cutu:cutd]-hx[cutl:pokl,cutu-1:cutd-1]))
-    ez[pokr:cutr,cutu:cutd] += dt/(e0*dx)*((hy[pokr:cutr,cutu:cutd]-hy[pokr-1:cutr-1,cutu:cutd])-(hx[pokr:cutr,cutu:cutd]-hx[pokr:cutr,cutu-1:cutd-1]))
+    ezp[cutl:cutr,cutu:cutd] = ez[cutl:cutr,cutu:cutd]
 
-    ez[pokl:pokr,cutu:poku] += dt/(e0*dx)*((hy[pokl:pokr,cutu:poku]-hy[pokl-1:pokr-1,cutu:poku])-(hx[pokl:pokr,cutu:poku]-hx[pokl:pokr,cutu-1:poku-1]))
-    ez[pokl:pokr,pokd:cutd] += dt/(e0*dx)*((hy[pokl:pokr,pokd:cutd]-hy[pokl-1:pokr-1,pokd:cutd])-(hx[pokl:pokr,pokd:cutd]-hx[pokl:pokr,pokd-1:cutd-1]))    
+    sJ[cutl:cutr,cutu:cutd] = 0
+    sJ[cutl:cutr,cutu:cutd] += ((1+kp_pla[cutl:cutr,cutu:cutd]) * Jp_pla[cutl:cutr,cutu:cutd]).real
+
+    ez[cutl:pokl,cutu:cutd] = C1_pla[cutl:pokl,cutu:cutd]*ez[cutl:pokl,cutu:cutd] + 2*dt*((((hy[cutl:pokl,cutu:cutd]-hy[cutl-1:pokl-1,cutu:cutd])-(hx[cutl:pokl,cutu:cutd]-hx[cutl:pokl,cutu-1:cutd-1]))/dx)-sJ[cutl:pokl,cutu:cutd])/C2_pla[cutl:pokl,cutu:cutd]
+    ez[pokr:cutr,cutu:cutd] = C1_pla[pokr:cutr,cutu:cutd]*ez[pokr:cutr,cutu:cutd] + 2*dt*((((hy[pokr:cutr,cutu:cutd]-hy[pokr-1:cutr-1,cutu:cutd])-(hx[pokr:cutr,cutu:cutd]-hx[pokr:cutr,cutu-1:cutd-1]))/dx)-sJ[pokr:cutr,cutu:cutd])/C2_pla[pokr:cutr,cutu:cutd]
+    ez[pokl:pokr,cutu:poku] = C1_pla[pokl:pokr,cutu:poku]*ez[pokl:pokr,cutu:poku] + 2*dt*((((hy[pokl:pokr,cutu:poku]-hy[pokl-1:pokr-1,cutu:poku])-(hx[pokl:pokr,cutu:poku]-hx[pokl:pokr,cutu-1:poku-1]))/dx)-sJ[pokl:pokr,cutu:poku])/C2_pla[pokl:pokr,cutu:poku]
+    ez[pokl:pokr,pokd:cutd] = C1_pla[pokl:pokr,pokd:cutd]*ez[pokl:pokr,pokd:cutd] + 2*dt*((((hy[pokl:pokr,pokd:cutd]-hy[pokl-1:pokr-1,pokd:cutd])-(hx[pokl:pokr,pokd:cutd]-hx[pokl:pokr,pokd-1:cutd-1]))/dx)-sJ[pokl:pokr,pokd:cutd])/C2_pla[pokl:pokr,pokd:cutd]
+
+    Jp_pla[cutl:cutr,cutu:cutd] = kp_pla[cutl:cutr,cutu:cutd] * Jp_pla[cutl:cutr,cutu:cutd] + bp_pla[cutl:cutr,cutu:cutd]*(ez[cutl:cutr,cutu:cutd]-ezp[cutl:cutr,cutu:cutd])/dt
 
     ##pokemon update
     ezp[pokl:pokr,poku:pokd] = ez[pokl:pokr,poku:pokd]
