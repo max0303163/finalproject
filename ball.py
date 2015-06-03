@@ -8,13 +8,15 @@ import cmath
 ##type : sin / gaussian
 ##snap : dynamic,from side
 ##others : none
-##command : do for [i=0:45]{load '2dpml.'.i.'.plt'; pause 0.2 }
+##command : do for [i=0:45]{load 'ball.'.i.'.plt'; pause 0.2 }
 ################################################################################
 ##constants
 c = 299792458
 u0 = pi*4E-7
 e0 = 1/(u0*c**2)
-sigma = 3.50E+7
+er2 = 9.34
+sigma1 = 0
+sigma2 = 3.50E+7
 
 ##parameter
 dx = 5.4e-3
@@ -37,11 +39,14 @@ bp = e0*cp*dt/(1-ap*dt/2)
 sbeta = 0
 for p in range(f0.size):
     sbeta += 2*bp[p].real
+    
+C1 = (2*e0*einf*sbeta-sigma2*dt)/(2*e0*einf*sbeta+sigma2*dt)
+C2 = (2*e0*einf+sbeta+sigma2*dt)
 
-C1 = (2*e0*einf*sbeta-sigma*dt)/(2*e0*einf*sbeta+sigma*dt)
-C2 = (2*e0*einf+sbeta+sigma*dt)
 
-##TE mode
+##plasma
+
+##TM mode
 hx = np.zeros((size,size-1))
 hy = np.zeros((size-1,size))
 ez = np.zeros((size,size))
@@ -66,12 +71,17 @@ dbHy = np.ones((size-1,size)) * dt/(u0*dx)
 ##frequency
 f = 278e+7
 
-##range for pokemon
-cutl = 50
-cutr = 150
-cutu = 50
-cutd = 150
+##range for air
+cutl = 10
+cutr = 190
+cutu = 10
+cutd = 190
 
+##range for pokemon
+pokl = 50
+pokr = 150
+poku = 50
+pokd = 150
 ##PML parameter
 npmls = 10
 rsize = size - npmls
@@ -152,19 +162,26 @@ for  n in range(500):
     Ezy[cutl:cutr,cutd:size-1] = caEzy[cutl:cutr,cutd:size-1] * Ezy[cutl:cutr,cutd:size-1] - cbEzy[cutl:cutr,cutd:size-1] * (hx[cutl:cutr,cutd:size-1]-hx[cutl:cutr,cutd-1:size-2])
     ez[cutl:cutr,cutd:size-1] = Ezx[cutl:cutr,cutd:size-1] + Ezy[cutl:cutr,cutd:size-1]
 
+    ##air update
+    ez[cutl:pokl,cutu:cutd] += dt/(e0*dx)*((hy[cutl:pokl,cutu:cutd]-hy[cutl-1:pokl-1,cutu:cutd])-(hx[cutl:pokl,cutu:cutd]-hx[cutl:pokl,cutu-1:cutd-1]))
+    ez[pokr:cutr,cutu:cutd] += dt/(e0*dx)*((hy[pokr:cutr,cutu:cutd]-hy[pokr-1:cutr-1,cutu:cutd])-(hx[pokr:cutr,cutu:cutd]-hx[pokr:cutr,cutu-1:cutd-1]))
+
+    ez[pokl:pokr,cutu:poku] += dt/(e0*dx)*((hy[pokl:pokr,cutu:poku]-hy[pokl-1:pokr-1,cutu:poku])-(hx[pokl:pokr,cutu:poku]-hx[pokl:pokr,cutu-1:poku-1]))
+    ez[pokl:pokr,pokd:cutd] += dt/(e0*dx)*((hy[pokl:pokr,pokd:cutd]-hy[pokl-1:pokr-1,pokd:cutd])-(hx[pokl:pokr,pokd:cutd]-hx[pokl:pokr,pokd-1:cutd-1]))    
+
     ##pokemon update
-    ezp[cutl:cutr,cutu:cutd] = ez[cutl:cutr,cutu:cutd]
+    ezp[pokl:pokr,poku:pokd] = ez[pokl:pokr,poku:pokd]
 
-    sJ[cutl:cutr,cutu:cutd] = 0
+    sJ[pokl:pokr,poku:pokd] = 0
     for p in range(f0.size):
 
-        sJ[cutl:cutr,cutu:cutd] += ((1+kp[p]) * Jp[cutl:cutr,cutu:cutd,p]).real
-    
-    ez[cutl:cutr,cutu:cutd] = C1*ez[cutl:cutr,cutu:cutd] + 2*dt*((((hy[cutl:cutr,cutu:cutd]-hy[cutl-1:cutr-1,cutu:cutd])-(hx[cutl:cutr,cutu:cutd]-hx[cutl:cutr,cutu-1:cutd-1]))/dx)-sJ[cutl:cutr,cutu:cutd])/C2
+        sJ[pokl:pokr,poku:pokd] += ((1+kp[p]) * Jp[pokl:pokr,poku:pokd,p]).real
+
+    ez[pokl:pokr,poku:pokd] = C1*ez[pokl:pokr,poku:pokd] + 2*dt*((((hy[pokl:pokr,poku:pokd]-hy[pokl-1:pokr-1,poku:pokd])-(hx[pokl:pokr,poku:pokd]-hx[pokl:pokr,poku-1:pokd-1]))/dx)-sJ[pokl:pokr,poku:pokd])/C2
 
     for p in range(f0.size):
 
-        Jp[cutl:cutr,cutu:cutd,p] = kp[p] * Jp[cutl:cutr,cutu:cutd,p] + bp[p]*(ez[cutl:cutr,cutu:cutd]-ezp[cutl:cutr,cutu:cutd])/dt
+        Jp[pokl:pokr,poku:pokd,p] = kp[p] * Jp[pokl:pokr,poku:pokd,p] + bp[p]*(ez[pokl:pokr,poku:pokd]-ezp[pokl:pokr,poku:pokd])/dt
 
 
     ##thunderbolt
